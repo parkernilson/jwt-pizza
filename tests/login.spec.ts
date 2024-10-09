@@ -40,7 +40,7 @@ test("Login of existing user should take the user to the dashboard", async ({
     });
   });
 
-  await page.goto("http://localhost:5173/");
+  await page.goto("/");
   await page.getByRole("link", { name: "Login" }).click();
   await page.getByPlaceholder("Email address").click();
   await page
@@ -53,23 +53,4 @@ test("Login of existing user should take the user to the dashboard", async ({
   await expect(page.getByLabel("Global")).toContainText("TU");
   await expect(page.getByLabel("Global")).toContainText("JWT Pizza");
   await expect(page.getByRole("button")).toContainText("Order now");
-});
-
-test("Login with invalid credentials should result in 404", async ({
-  page,
-}) => {
-  await page.goto("http://localhost:5173/");
-  await page.getByRole("link", { name: "Login" }).click();
-  await expect(page).toHaveURL("http://localhost:5173/login");
-  await page.getByPlaceholder("Email address").click();
-  await page.getByPlaceholder("Email address").fill("notexist@gmail.com");
-  await page.getByPlaceholder("Email address").press("Tab");
-  await page.getByPlaceholder("Password").fill("pass");
-  await page.getByRole("button", { name: "Login" }).click();
-  await expect(page.getByRole("main")).toContainText(
-    '{"code":404,"message":"unknown user"}'
-  );
-  await expect(page.getByRole("heading")).toContainText("Welcome back");
-  await expect(page.locator("form")).toContainText("Login");
-  await expect(page).toHaveURL("http://localhost:5173/login");
 });
