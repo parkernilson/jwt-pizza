@@ -59,16 +59,17 @@ test("Franchisee can view their own franchise and stores", async ({ page }) => {
 
   await page.goto("/");
 
-  await page
-    .getByLabel("Global")
-    .getByRole("link", { name: "Franchise" })
-    .click();
-  await page.getByRole("link", { name: "login", exact: true }).click();
+  await page.getByRole("link", { name: "Login", exact: true }).click();
   await page.getByPlaceholder("Email address").fill("franchisee1@gmail.com");
   await page.getByPlaceholder("Email address").press("Tab");
   await page.getByPlaceholder("Password").fill("password123");
   await page.getByRole("button", { name: "Login" }).click();
+  await page
+    .getByLabel("Global")
+    .getByRole("link", { name: "Franchise" })
+    .click();
   await expect(page.getByRole("heading")).toContainText("Franchise 1");
   await expect(page.locator("tbody")).toContainText("Store 1");
   await expect(page.locator("tbody")).toContainText("0 ₿");
+
 });
