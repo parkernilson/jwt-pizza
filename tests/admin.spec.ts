@@ -59,7 +59,6 @@ test("Admin can view franchises", async ({ page }) => {
   await page.getByPlaceholder("Email address").press("Tab");
   await page.getByPlaceholder("Password").fill("admin");
   await page.getByRole("button", { name: "Login" }).click();
-  await page.waitForTimeout(1000);
   await page.getByRole("link", { name: "Admin" }).click();
   await expect(page.locator("tbody")).toContainText("Franchise 1");
   await expect(page.locator("tbody")).toContainText("Franchisee One");
