@@ -68,7 +68,7 @@ test("Admin can view franchises", async ({ page }) => {
 });
 
 test("Admin can delete a franchise", async ({ page }) => {
-  await page.route("**/*/api/auth/login", async (route) => {
+  await page.route("**/*/api/auth", async (route) => {
     expect(route.request().postDataJSON()).toStrictEqual(loginAdminReq);
     expect(route.request().method()).toBe("PUT");
     await route.fulfill({ json: loginAdminRes });
