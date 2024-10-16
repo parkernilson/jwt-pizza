@@ -74,6 +74,13 @@ export class JwtPizzaClientStack extends cdk.Stack {
       description: 'Role for GitHub Actions to deploy to S3 and invalidate CloudFront',
     });
 
+    // Create an OIDC provider for GitHub Actions
+    const oidcProvider = new iam.OpenIdConnectProvider(this, 'GitHubActionsOIDCProvider', {
+      url: 'https://token.actions.githubusercontent.com',
+      clientIds: ['sts.amazonaws.com'],
+      thumbprints: ['d89e3bd43d5d909b47a18977aa9d5ce36cee184c'], // GitHub's OIDC thumbprint
+    });
+
     // Grant the role permissions to write to S3 and invalidate CloudFront
     siteBucket.grantReadWrite(githubActionsRole);
     distribution.grantCreateInvalidation(githubActionsRole);
