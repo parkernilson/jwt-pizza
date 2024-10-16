@@ -5,6 +5,8 @@ on:
     branches:
       - main
   workflow_dispatch:
+permissions:
+  id-token: write
 jobs:
   build:
     name: Build
@@ -23,7 +25,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # TODO: Temp disable UI tests
+      # DISABLED UI TESTS
       # - name: Run tests
       #   run: |
       #     npx playwright install --with-deps chromium
@@ -40,32 +42,26 @@ jobs:
       #     git commit -m "generated"
       #     git push
 
-      - name: set version
+      - name: Set version
         id: set_version
         run: |
           version=$(date +'%Y%m%d.%H%M%S')
           echo "version=$version" >> "$GITHUB_OUTPUT"
           printf '{"version": "%s" }' "$version" > public/version.json
 
-      - name: Build
-        run: |
-          npm ci && npm run build
-          cp dist/index.html dist/404.html
-
-      - name: Update pages artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: dist/
-  deploy:
+      - name: Build app
+        run: npm run build
+  deploy-s3:
     needs: build
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Create OIDC token to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          audience: sts.amazonaws.com
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/${{ secrets.CI_IAM_ROLE }}
+      - name: Push to AWS S3
+        run: |
+          aws s3 cp dist s3://${{ secrets.APP_BUCKET }} --recursive
+          aws cloudfront create-invalidation --distribution-id ${{ secrets.DISTRIBUTION_ID }} --paths "/*"
