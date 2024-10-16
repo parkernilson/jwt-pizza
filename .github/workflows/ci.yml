@@ -51,6 +51,12 @@ jobs:
 
       - name: Build app
         run: npm run build
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: dist
+          path: dist
   deploy-s3:
     needs: build
     runs-on: ubuntu-latest
@@ -61,6 +67,13 @@ jobs:
           audience: sts.amazonaws.com
           aws-region: us-east-1
           role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/${{ secrets.CI_IAM_ROLE }}
+      
+      - name: Download build artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: dist
+
       - name: Push to AWS S3
         run: |
           aws s3 cp dist s3://${{ secrets.APP_BUCKET }} --recursive
