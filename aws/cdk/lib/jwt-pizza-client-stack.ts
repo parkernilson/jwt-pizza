@@ -127,7 +127,10 @@ export class JwtPizzaClientStack extends cdk.Stack {
         'cloudfront:GetDistribution',
         'cloudfront:GetDistributionConfig'
       ],
-      resources: [`arn:aws:cloudfront::${accountId}:distribution/${distribution.distributionId}`]
+      resources: [
+        `arn:aws:cloudfront::${accountId}:distribution/${distribution.distributionId}`,
+        `arn:aws:cloudfront::${accountId}:distribution/${stageDistribution.distributionId}`
+      ]
     }));
 
     // Output the necessary information
