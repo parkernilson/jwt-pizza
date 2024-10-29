@@ -103,6 +103,7 @@ export class JwtPizzaClientStack extends cdk.Stack {
           'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
           'token.actions.githubusercontent.com:sub': [
             `repo:${githubUsername}/${githubRepoName}:environment:production`,
+            `repo:${githubUsername}/${githubRepoName}:environment:staging`,
             `repo:${githubUsername}/${githubRepoName}:ref:refs/heads/main`
           ]
         },
@@ -120,6 +121,14 @@ export class JwtPizzaClientStack extends cdk.Stack {
     // Grant the role permissions to write to S3 and invalidate CloudFront
     siteBucket.grantReadWrite(githubActionsRole);
     distribution.grantCreateInvalidation(githubActionsRole);
+    githubActionsRole.addToPolicy(new iam.PolicyStatement({
+      actions: [
+        'cloudfront:UpdateDistribution',
+        'cloudfront:GetDistribution',
+        'cloudfront:GetDistributionConfig'
+      ],
+      resources: [`arn:aws:cloudfront::${accountId}:distribution/${distribution.distributionId}`]
+    }));
 
     // Output the necessary information
     new cdk.CfnOutput(this, 'BucketName', { value: siteBucket.bucketName });
