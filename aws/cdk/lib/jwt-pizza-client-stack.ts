@@ -120,9 +120,9 @@ export class JwtPizzaClientStack extends cdk.Stack {
 
     // Grant the role permissions to write to S3 and invalidate CloudFront
     siteBucket.grantReadWrite(githubActionsRole);
-    distribution.grantCreateInvalidation(githubActionsRole);
     githubActionsRole.addToPolicy(new iam.PolicyStatement({
       actions: [
+        'cloudfront:CreateInvalidation',
         'cloudfront:UpdateDistribution',
         'cloudfront:GetDistribution',
         'cloudfront:GetDistributionConfig'
