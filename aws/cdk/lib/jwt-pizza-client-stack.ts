@@ -68,7 +68,10 @@ export class JwtPizzaClientStack extends cdk.Stack {
       assumedBy: new iam.WebIdentityPrincipal(`arn:aws:iam::${accountId}:oidc-provider/token.actions.githubusercontent.com`, {
         StringEquals: {
           'token.actions.githubusercontent.com:aud': 'sts.amazonaws.com',
-          'token.actions.githubusercontent.com:sub': `repo:${githubUsername}/${githubRepoName}:ref:refs/heads/main`
+          'token.actions.githubusercontent.com:sub': [
+            `repo:${githubUsername}/${githubRepoName}:environment:production`,
+            `repo:${githubUsername}/${githubRepoName}:ref:refs/heads/main`
+          ]
         },
       }),
       description: 'Role for GitHub Actions to deploy to S3 and invalidate CloudFront',
