@@ -15,6 +15,7 @@ export class JwtPizzaClientStack extends cdk.Stack {
 
     const domainName = 'parkernilson.dev';
     const siteDomain = `pizza.${domainName}`;
+    const stageDomain = `stage-pizza.${domainName}`;
     
     const accountId = cdk.Stack.of(this).account
 
@@ -37,11 +38,43 @@ export class JwtPizzaClientStack extends cdk.Stack {
       validation: acm.CertificateValidation.fromDns()
     });
 
+    const stageCertificate = new acm.Certificate(this, 'StageCertificate', {
+      domainName: stageDomain,
+      validation: acm.CertificateValidation.fromDns()
+    });
+
     // CloudFront distribution
     const distribution = new cloudfront.Distribution(this, 'SiteDistribution', {
       certificate: certificate,
+      comment: "JWT Pizza Production",
       defaultRootObject: "index.html",
       domainNames: [siteDomain],
+      minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
+      errorResponses: [
+        {
+          httpStatus: 403,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
+        },
+        {
+          httpStatus: 404,
+          responseHttpStatus: 200,
+          responsePagePath: '/index.html',
+        },
+      ],
+      defaultBehavior: {
+        origin: origins.S3BucketOrigin.withOriginAccessIdentity(siteBucket, {originAccessIdentity}),
+        compress: true,
+        allowedMethods: cloudfront.AllowedMethods.ALLOW_GET_HEAD_OPTIONS,
+        viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+      }
+    });
+
+    const stageDistribution = new cloudfront.Distribution(this, 'StageDistribution', {
+      certificate: stageCertificate,
+      comment: "JWT Pizza Stage",
+      defaultRootObject: "index.html",
+      domainNames: [stageDomain],
       minimumProtocolVersion: cloudfront.SecurityPolicyProtocol.TLS_V1_2_2021,
       errorResponses: [
         {
